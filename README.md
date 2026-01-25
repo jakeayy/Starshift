@@ -9,7 +9,7 @@ Starshift is a powerful Mod Loader for game ISAT (In Stars And Time) with minima
 ### a) Automatic (Linux Only)
 This project includes an installation script that looks for the game's directory and installs all needed files! (Including Steam Integration Fix)
 ```sh
-curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/install.sh | bash
+bash <(curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/install.sh)
 ```
 > [!WARNING]
 > Even though this script is trusted, ALWAYS check it's source before executing! - as a safety measure.
