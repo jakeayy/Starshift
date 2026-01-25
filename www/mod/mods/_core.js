@@ -51,6 +51,9 @@ export const onRegister = () => {
 export const onLoad = () => {
     loadSettings()
 
+    // stub out unused titles2 from loading (start again unused sprite)
+    ImageManager.loadTitle2 = () => null
+
     // mods button
     const title_makeCommandList = Window_TitleCommand.prototype.makeCommandList
     Window_TitleCommand.prototype.makeCommandList = function() {
