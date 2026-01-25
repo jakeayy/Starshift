@@ -92,18 +92,6 @@ if [[ "$install_port" == "y" || "$install_port" == "Y" ]]; then
         else
              echo -e "${YELLOW}Warning: libsdkencryptedappticket64.so not found, skipping rename.${NC}"
         fi
-
-        # 2. Download specific Greenworks node file
-        echo "Downloading compatible Greenworks binary..."
-        wget -q --show-progress "$GREENWORKS_URL" -O "$TEMP_DIR/greenworks-linux64.node"
-
-        if [ $? -eq 0 ]; then
-            # Move to www folder
-            mv "$TEMP_DIR/greenworks-linux64.node" "$GAME_DIR/www/lib/greenworks-linux64.node"
-            echo " - Installed greenworks-linux64.node"
-        else
-             echo -e "${RED}Failed to download Greenworks binary.${NC}"
-        fi
         
         echo -e "${GREEN}Linux port installed successfully.${NC}"
         echo "---------------------------------------------------"
