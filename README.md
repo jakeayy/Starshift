@@ -26,7 +26,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/script
 #### Tutorial:
 1. Clone the repo with:
     ```sh
-    git clone https://github.com/jakeayy/Starshift.sh
+    git clone https://github.com/jakeayy/Starshift.git
     ```
 2. Navigate to the newly downloaded directory
 3. Download dependencies with:
