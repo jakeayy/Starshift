@@ -21,7 +21,7 @@ echo -e "${YELLOW}IMPORTANT:${NC} Before proceeding, please ensure:"
 echo "1. You have verified the integrity of game files on Steam."
 echo "2. You are running on a CLEAN installation of 'In Stars And Time'."
 echo ""
-read -p "Have you verified these steps? (y/n): " confirm_clean
+read -p "Have you verified these steps? (y/n): " confirm_clean < /dev/tty
 
 if [[ "$confirm_clean" != "y" && "$confirm_clean" != "Y" ]]; then
     echo -e "${RED}Aborting installation. Please verify your game files and try again.${NC}"
@@ -99,7 +99,7 @@ fi
 echo ""
 echo -e "${YELLOW}Would you like to install the Linux native port (NW.js)?${NC}"
 echo "This allows you to play without using Wine/Proton."
-read -p "Install Linux port? (y/n): " install_port
+read -p "Install Linux port? (y/n): " install_port < /dev/tty
 
 if [[ "$install_port" == "y" || "$install_port" == "Y" ]]; then
     echo ""
