@@ -36,23 +36,61 @@ if [ ! -d "$GAME_DIR" ]; then
     exit 1
 fi
 
-# 2. Clone Repository and Install Files
+# 2. Download and Install Latest Release
 echo ""
-echo -e "${GREEN}Downloading Starshift...${NC}"
+echo -e "${GREEN}Fetching latest release info...${NC}"
 
-# Clone to temp dir to keep it clean
-if git clone "$REPO_URL" "$TEMP_DIR/Starshift"; then
+# Get the download URL for the latest release (first asset)
+DOWNLOAD_URL=$(curl -s "https://api.github.com/repos/jakeayy/Starshift/releases/latest" | grep "browser_download_url" | cut -d '"' -f 4 | head -n 1)
+
+if [ -n "$DOWNLOAD_URL" ]; then
+    echo "Downloading Starshift from $DOWNLOAD_URL..."
+    
+    # Determine filename from URL
+    FILENAME=$(basename "$DOWNLOAD_URL")
+    DEST_FILE="$TEMP_DIR/$FILENAME"
+    
+    wget -q --show-progress "$DOWNLOAD_URL" -O "$DEST_FILE"
+    
+    # Create extraction directory
+    mkdir -p "$TEMP_DIR/Starshift"
+    
+    echo "Extracting..."
+    if [[ "$FILENAME" == *.zip ]]; then
+        if ! command -v unzip &> /dev/null; then
+            echo -e "${RED}Error: 'unzip' is required but not installed.${NC}"
+            rm -rf "$TEMP_DIR"
+            exit 1
+        fi
+        unzip -q "$DEST_FILE" -d "$TEMP_DIR/Starshift"
+    elif [[ "$FILENAME" == *.tar.gz ]] || [[ "$FILENAME" == *.tgz ]]; then
+        tar -xzf "$DEST_FILE" -C "$TEMP_DIR/Starshift"
+    else
+        echo -e "${RED}Unknown archive format: $FILENAME${NC}"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+
     echo "Copying files to game directory..."
+    
+    SOURCE_DIR="$TEMP_DIR/Starshift"
+    # Handle case where zip wraps files in a top-level folder
+    if [ ! -d "$SOURCE_DIR/www" ]; then
+        NUM_DIRS=$(find "$SOURCE_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l)
+        if [ "$NUM_DIRS" -eq 1 ]; then
+             SOURCE_DIR=$(find "$SOURCE_DIR" -mindepth 1 -maxdepth 1 -type d)
+        fi
+    fi
 
     # Copy mod loader files
-    if [ -d "$TEMP_DIR/Starshift/www" ]; then
-        cp -r "$TEMP_DIR/Starshift/www" "$GAME_DIR/"
+    if [ -d "$SOURCE_DIR/www" ]; then
+        cp -r "$SOURCE_DIR/www" "$GAME_DIR/"
         echo " - Installed www folder"
     else
-        echo -e "${RED}Warning: www folder not found in repository.${NC}"
+        echo -e "${RED}Warning: www folder not found in the downloaded release.${NC}"
     fi
 else
-    echo -e "${RED}Failed to clone repository. Check your internet connection.${NC}"
+    echo -e "${RED}Failed to find latest release. Check your internet connection or GitHub API limits.${NC}"
     rm -rf "$TEMP_DIR"
     exit 1
 fi

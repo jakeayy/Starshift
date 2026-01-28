@@ -1,4 +1,4 @@
-![](/icon.webp)
+![](/assets/icon.webp)
 # Starshift
 Starshift is a powerful Mod Loader for game ISAT (In Stars And Time) with minimal footprint and as much performance as possible!
 > [!CAUTION]
@@ -9,17 +9,37 @@ Starshift is a powerful Mod Loader for game ISAT (In Stars And Time) with minima
 ### a) Automatic (Linux Only)
 This project includes an installation script that looks for the game's directory and installs all needed files! (Including Steam Integration Fix)
 ```sh
-bash <(curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/install.sh)
+bash <(curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/scripts/install.sh)
 ```
 > [!WARNING]
 > Even though this script is trusted, ALWAYS check it's source before executing! - as a safety measure.
 
 ### b) Manual
-1. Clone the repo with `Code` button or:
-```sh
-git clone https://github.com/jakeayy/Starshift.git
-```
-2. Move the **`www`** directory to your game directory!
+1. Go to [Releases](https://github.com/jakeayy/Starshift/releases) page
+2. Download latest release
+3. Unpack all files to game directory. **Ensure path of `www` directory matches the one you just unpacked!**
+
+### c) Building
+#### Prerequisites:
+- [git (most likely already included if you're on Linux)](https://git-scm.com)
+- [npm (included with NodeJS)](https://nodejs.org/) or preferably [bun runtime](https://bun.sh) (for this guide we'll use bun)
+#### Tutorial:
+1. Clone the repo with:
+    ```sh
+    git clone https://github.com/jakeayy/Starshift.sh
+    ```
+2. Navigate to the newly downloaded directory
+3. Download dependencies with:
+    ```sh
+    bun install
+    ```
+4. Build it!
+    ```sh
+    bun run build
+    ```
+5. The final files should be in `dist` directory! Just follow the same steps as from [Manual Guide](#b-manual) or you can use `bun inject` to automatically install it to your game
+    > [!CAUTION]
+    > Injecting currently works only on Linux and **OVERRIDES ALL YOUR MOD LOADER DATA**. Be sure to backup any mods you care about.
 
 
 ## Options
@@ -30,12 +50,14 @@ git clone https://github.com/jakeayy/Starshift.git
 
 
 ## TODO
+- [ ] - REWRITE - internal variable typings
+- [x] - REWRITE - loading screen
+- [ ] - REWRITE - logs
 - [ ] - Ability to disable specific mods from menu
-- [ ] - Settings - Boolean option support
 - [ ] - Mods and loader in-fly building and caching
-- [ ] - Built-in Helpers
+- [ ] - Built-in helpers and API
+- [ ] - Universal Game Interpreter API for easier RPG Maker scripting support
 - [x] - Proper install script w/ Linux Support - **CURRENTLY LINUX ONLY**
-- [x] - Linux Port - Fix Steam connection errors - **INSTALL THROUGH INSTALLER FOR SUPPORT**
 - [ ] - Possibly more game optimizations? (including memory leak fix)
 
 ...and more

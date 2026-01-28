@@ -1,0 +1,1 @@
+export { default as gameInterpreter } from "./game_interpreter"

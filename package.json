@@ -1,0 +1,30 @@
+{
+  "name": "starshift",
+  "description": "A powerful Mod Loader for In Stars And Time with minimal footprint and as much performance!",
+  "repository": "https://github.com/jakeayy/starshift",
+  "author": {
+    "name": "jakeayy",
+    "url": "https://jakeayy.xyz"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "bun scripts/build",
+    "inject": "./scripts/inject.sh && echo Injected!"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/nw.js": "^0.92.0",
+    "cssnano": "^7.1.2",
+    "esbuild": "^0.27.2",
+    "esbuild-plugin-import-glob": "^0.1.1",
+    "htmlnano": "^3.0.0",
+    "postcss": "^8.5.6",
+    "svgo": "^4.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@types/pixi.js": "4.5.4"
+  }
+}

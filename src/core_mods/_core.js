@@ -1,15 +1,17 @@
-import { loadSettings, getSettingId } from "./_core/settings.js";
-import { Window_ModMenu } from "./_core/windows.js"
+import prepareSettingsMenu from "./_core/settings"
+import Window_ModMenu from "./_core/windows"
+import { spawn } from "child_process"
 
-export const meta = {
+/** @satisfies {import("@/types").ModConfig} */
+export const config = {
     name: "CORE",
+    description: "Core features of Starshift",
     author: "jakeayy",
-    description: "Essentials for mod loader.",
-    forced: true,
+    version: "0.0",
     settings: {
         fps: {
             title: "FPS Limit",
-            description: "Set max amount of FPS (can't get higher than supported amount on your PC)",
+            helpMessage: "Set max amount of FPS (can't get higher than supported amount on your PC)",
             type: "scale",
             min: 0,
             max: 60,
@@ -19,7 +21,7 @@ export const meta = {
         },
         saveSettings: {
             title: "Save Settings",
-            description: "Saves mod loader settings",
+            helpMessage: "Saves mod loader settings",
             type: "button",
             onOk: () => {
                 window.Starshift.saveSettings()
@@ -28,14 +30,14 @@ export const meta = {
         },
         restartNoMod: {
             title: "Disable Mod Loader",
-            description: "Force disables loading any mods for next run!",
+            helpMessage: "Force disables loading any mods for next run!",
             type: "button",
             onOk: () => {
                 SoundManager.playLoad()
                 SceneManager._scene.fadeOutAll()
 
                 setTimeout(() => {
-                    require("child_process").spawn(process.execPath, ["--no-mods"], { detached: true, stdio: "ignore" }).unref()
+                    spawn(process.execPath, ["--no-mods"], { detached: true, stdio: "ignore" }).unref()
                     nw.App.quit();
                 }, 1000)
             }
@@ -44,12 +46,13 @@ export const meta = {
 }
 
 
-export const onRegister = () => {
-    console.log("if you see this, that means core mod is working! :D")
+export function onRegister() {
+    console.log("if you see this, that means core mod is working! :3")
 }
 
-export const onLoad = () => {
-    loadSettings()
+/** @param {import("@/types").Mod<typeof config>} mod  */
+export function onLoad(mod) {
+    prepareSettingsMenu()
 
     // stub out unused titles2 from loading (start again unused sprite)
     ImageManager.loadTitle2 = () => null
@@ -65,22 +68,21 @@ export const onLoad = () => {
     Scene_Title.prototype.createCommandWindow = function() {
         title_createCommandWindow.bind(this)()
         this._commandWindow.setHandler('mods', () => {
-            const menu = new Window_ModMenu(this);
+            const menu = new Window_ModMenu(this._commandWindow);
             this.addChild(menu)
         });
     }
 
     // fps limiter
     SceneManager.requestUpdate = function() {
-        const targetFps = ConfigManager[getSettingId(meta.name, "fps")];
-
         if (!this._stopped) {
             requestAnimationFrame(timestamp => {
-                if (targetFps <= 0) return SceneManager.update();
-
+                if (mod.store.settings.fps <= 0)
+                    return SceneManager.update();
+                
                 if (!SceneManager._lastFrameTime) SceneManager._lastFrameTime = timestamp;
                 var elapsed = timestamp - SceneManager._lastFrameTime;
-                var interval = 1000 / targetFps;
+                var interval = 1000 / mod.store.settings.fps;
                 if (elapsed > interval) {
                     SceneManager._lastFrameTime = timestamp - (elapsed % interval);
                     SceneManager.update();
