@@ -26,7 +26,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/script
 #### Tutorial:
 1. Clone the repo with:
     ```sh
-    git clone https://github.com/jakeayy/Starshift.sh
+    git clone https://github.com/jakeayy/Starshift.git
     ```
 2. Navigate to the newly downloaded directory
 3. Download dependencies with:
@@ -38,8 +38,8 @@ bash <(curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/script
     bun run build
     ```
 5. The final files should be in `dist` directory! Just follow the same steps as from [Manual Guide](#b-manual) or you can use `bun inject` to automatically install it to your game
-    > [!CAUTION]
-    > Injecting currently works only on Linux and **OVERRIDES ALL YOUR MOD LOADER DATA**. Be sure to backup any mods you care about.
+> [!CAUTION]
+> Injecting currently works only on Linux and **OVERRIDES ALL YOUR MOD LOADER DATA**. Be sure to backup any mods you care about.
 
 
 ## Options
@@ -53,7 +53,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/script
 - [ ] - REWRITE - internal variable typings
 - [x] - REWRITE - loading screen
 - [ ] - REWRITE - logs
-- [ ] - Ability to disable specific mods from menu
+- [x] - Ability to disable specific mods from menu
 - [ ] - Mods and loader in-fly building and caching
 - [ ] - Built-in helpers and API
 - [ ] - Universal Game Interpreter API for easier RPG Maker scripting support
