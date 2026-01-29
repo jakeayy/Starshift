@@ -37,26 +37,26 @@ const tempMessageAdd = async (message) => {
 
 export default class Window_ModMenu extends Window_Selectable {
     parentWindow;
-    modChanged = false;
+    changedMods = new Set()
     /** @type {import("@/types").Mod[]} */
-    _data = [
-        ...window.Starshift.mods.values(),
-        {
-            id: "1111.js",
-            name: "test mod",
-            description: "test mod not real",
-            author: "ok",
-            builtIn: false,
-            version: "0.0",
-            store: { settings: { enabled: true } }
-        }
-    ]
+    _data = Array.from(window.Starshift.mods.values())
 
     constructor(parentWindow) {
         super(0, 0, 500, 500)
         this.parentWindow = parentWindow;
         this.x = (Graphics.boxWidth - this.width) / 2;
         this.y = (Graphics.boxHeight - this.height) / 2;
+
+        if (window.Starshift.isDebug) // pushing fake data for testing
+            this._data.push({
+                id: "TEST.js",
+                name: "DEBUG TEST MOD",
+                description: "Not a real mod, only for mod menu test",
+                author: "???",
+                builtIn: false,
+                version: "0.0",
+                store: { settings: { enabled: true } }
+            })
         
         this.refresh()
         this.select(0)
@@ -64,18 +64,22 @@ export default class Window_ModMenu extends Window_Selectable {
         this.setHandler("cancel", async () => {
             this.close()
 
-            window.Starshift.saveSettings()
-            if (this.modChanged)
+            if (this.changedMods.size > 0) {
+                this.changedMods.clear()
+                window.Starshift.saveSettings()
                 await tempMessageAdd("\\m[vtuto][Psst!\\| You need to restart the game if you want to\ndisable mods! Just saying~]")
+            }
             
             this.parentWindow.activate()
         })
 
         this.setHandler("ok", () => {
-            this.modChanged ||= true;
-            
-            const settings = this._data[this.index()].store.settings;
-            settings.enabled = !settings.enabled
+            const mod = this._data[this.index()]
+
+            if (this.changedMods.has(mod.id)) this.changedMods.delete(mod.id)
+            else this.changedMods.add(mod.id)
+
+            mod.store.settings.enabled = !mod.store.settings.enabled
 
             this.redrawCurrentItem();
             this.activate()

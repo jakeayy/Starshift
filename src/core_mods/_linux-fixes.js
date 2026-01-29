@@ -15,26 +15,28 @@ export const config = {
 }
 
 export const onLoad = () => {
-	/** @type {Map<string, string[]>} */
-	const dirCache = new Map()
+	/** @type {Map<string, Map<string, string>>} */
+	const dirMapCache = new Map()
 	
 	// file case fix
 	const loadBitmap = ImageManager.loadBitmap
 	ImageManager.loadBitmap = function(dir, fileName, ...args) {
-		const files = dirCache.get(dir)
-			?? (() => {
-				const files = readdirSync(join(ROOT, dir))
-					.map(f => f.split(".").slice(0, -1).join("."))
+		let fileMap = dirMapCache.get(dir)
 
-				dirCache.set(dir, files)
-				return files
-			})()
+		if (!fileMap) {
+			fileMap = new Map();
 
-		const correctedFileName =
-			files.includes(fileName)
-				? fileName
-				: files.find(f => f.toLowerCase() === fileName.toLowerCase()) ?? fileName
-				
+			try {
+				readdirSync(join(ROOT, dir)).forEach(f => {
+					const baseName = f.split('.').slice(0, -1).join('.');
+					fileMap.set(baseName.toLowerCase(), baseName)
+				})
+			} catch(e) { console.warn("Could not setup fileMap cache! ", e) }
+
+			dirMapCache.set(dir, fileMap)
+		}
+
+		const correctedFileName = fileMap.get(fileName.toLowerCase()) ?? fileName;
 		return loadBitmap.apply(this, [dir, correctedFileName, ...args])
 	}
 }
