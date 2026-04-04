@@ -2,7 +2,7 @@
 
 # --- Configuration ---
 GAME_DIR="$HOME/.steam/steam/steamapps/common/In Stars And Time"
-REPO_URL="https://github.com/jakeayy/Starshift"
+REPO_URL="https://codeberg.org/jakeayy/Starshift"
 NWJS_URL="https://dl.nwjs.io/v0.49.1/nwjs-sdk-v0.49.1-linux-x64.tar.gz"
 TEMP_DIR=$(mktemp -d)
 
@@ -41,7 +41,7 @@ echo ""
 echo -e "${GREEN}Fetching latest release info...${NC}"
 
 # Get the download URL for the latest release (first asset)
-DOWNLOAD_URL=$(curl -s "https://api.github.com/repos/jakeayy/Starshift/releases/latest" | grep "browser_download_url" | cut -d '"' -f 4 | head -n 1)
+DOWNLOAD_URL=$(curl -s "https://codeberg.org/api/v1/repos/jakeayy/Starshift/releases?limit=1" | grep -o '"browser_download_url":"[^"]*"' | cut -d '"' -f 4 | head -n 1)
 
 if [ -n "$DOWNLOAD_URL" ]; then
     echo "Downloading Starshift from $DOWNLOAD_URL..."

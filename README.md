@@ -9,13 +9,13 @@ Starshift is a powerful Mod Loader for game ISAT (In Stars And Time) with minima
 ### a) Automatic (Linux Only)
 This project includes an installation script that looks for the game's directory and installs all needed files! (Including Steam Integration Fix)
 ```sh
-bash <(curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/scripts/install.sh)
+bash <(curl -sSL https://codeberg.org/jakeayy/Starshift/raw/branch/main/scripts/install.sh)
 ```
 > [!WARNING]
 > Even though this script is trusted, ALWAYS check it's source before executing! - as a safety measure.
 
 ### b) Manual
-1. Go to [Releases](https://github.com/jakeayy/Starshift/releases) page
+1. Go to [Releases](https://codeberg.org/jakeayy/Starshift/releases) page
 2. Download latest release
 3. Unpack all files to game directory. **Ensure path of `www` directory matches the one you just unpacked!**
 
@@ -26,7 +26,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/jakeayy/Starshift/main/script
 #### Tutorial:
 1. Clone the repo with:
     ```sh
-    git clone https://github.com/jakeayy/Starshift.git
+    git clone https://codeberg.org/jakeayy/Starshift.git
     ```
 2. Navigate to the newly downloaded directory
 3. Download dependencies with:
