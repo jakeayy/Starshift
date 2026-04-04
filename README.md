@@ -64,4 +64,4 @@ bash <(curl -sSL https://codeberg.org/jakeayy/Starshift/raw/branch/main/scripts/
 
 
 ## Licenses
-Both Starshift and Greenworks (that is bundled with this project for compatibility reasons) are licensed under MIT License! Check Starshift's license [here](/LICENSE) and Greenwork's license [here](/www/lib/GREENWORKS_LICENSE)
+Both Starshift and Greenworks (that is bundled with this project for compatibility reasons) are licensed under MIT License! Check Starshift's license [here](LICENSE) and Greenwork's license [here](www/lib/GREENWORKS_LICENSE)
