@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # --- Configuration ---
-GAME_DIR="$HOME/.steam/steam/steamapps/common/In Stars And Time"
+GAME_NAME="In Stars And Time"
+NWJS_VERSION="0.49.2"
 REPO_URL="https://codeberg.org/jakeayy/Starshift"
-NWJS_URL="https://dl.nwjs.io/v0.49.1/nwjs-sdk-v0.49.1-linux-x64.tar.gz"
+NWJS_URL="https://dl.nwjs.io/v${NWJS_VERSION}/nwjs-v${NWJS_VERSION}-linux-x64.tar.gz"
 TEMP_DIR=$(mktemp -d)
 
 # --- Colors for Output ---
@@ -12,8 +13,106 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# --- Dependency Check ---
+# curl and wget are both required; tar is always needed for NW.js.
+# unzip is only needed if the release ships as a .zip, but we check it
+# now so the user can install everything missing in one go.
+check_deps() {
+    local missing=()
+    local required=(curl wget tar)
+    local optional=(unzip)
+
+    for bin in "${required[@]}"; do
+        if ! command -v "$bin" &> /dev/null; then
+            missing+=("$bin")
+        fi
+    done
+
+    local missing_optional=()
+    for bin in "${optional[@]}"; do
+        if ! command -v "$bin" &> /dev/null; then
+            missing_optional+=("$bin")
+        fi
+    done
+
+    if [ ${#missing_optional[@]} -gt 0 ]; then
+        echo -e "${YELLOW}Warning: optional dependency not found: ${missing_optional[*]}${NC}"
+        echo "  'unzip' is required only if the mod release is packaged as a .zip."
+        echo "  Install it now to avoid a potential failure later."
+        echo ""
+    fi
+
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo -e "${RED}Error: missing required dependencies: ${missing[*]}${NC}"
+        echo ""
+        echo "Install them with your package manager, for example:"
+        echo "  Debian/Ubuntu:  sudo apt install ${missing[*]}"
+        echo "  Fedora:         sudo dnf install ${missing[*]}"
+        echo "  Arch:           sudo pacman -S ${missing[*]}"
+        echo "  openSUSE:       sudo zypper install ${missing[*]}"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+}
+
+# --- Auto-detect Game Directory ---
+find_game_dir() {
+    # Known default Steam root locations
+    local steam_roots=(
+        "$HOME/.steam/steam"
+        "$HOME/.local/share/Steam"
+        "$HOME/.var/app/com.valvesoftware.Steam/.local/share/Steam"  # Flatpak
+        "/usr/share/steam"
+        "/usr/local/share/steam"
+    )
+
+    # Collect all steamapps paths: defaults + any extra libraries from libraryfolders.vdf
+    local steamapps_dirs=()
+    for root in "${steam_roots[@]}"; do
+        local vdf="$root/steamapps/libraryfolders.vdf"
+        steamapps_dirs+=("$root/steamapps")
+        if [ -f "$vdf" ]; then
+            # Parse "path" entries — covers both old and new VDF formats
+            while IFS= read -r line; do
+                local lib_path
+                lib_path=$(echo "$line" | grep -i '"path"' | sed 's/.*"path"[[:space:]]*"\([^"]*\)".*/\1/')
+                if [ -n "$lib_path" ] && [ -d "$lib_path/steamapps" ]; then
+                    steamapps_dirs+=("$lib_path/steamapps")
+                fi
+            done < "$vdf"
+        fi
+    done
+
+    # Search each steamapps directory for the game folder
+    for dir in "${steamapps_dirs[@]}"; do
+        local candidate="$dir/common/$GAME_NAME"
+        if [ -d "$candidate" ]; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 clear
 echo -e "${GREEN}=== Starshift Mod Loader Installer ===${NC}"
+echo ""
+
+# --- Check Dependencies ---
+check_deps
+
+# --- Locate Game ---
+echo -e "${GREEN}Searching for '$GAME_NAME' installation...${NC}"
+GAME_DIR=$(find_game_dir)
+
+if [ -z "$GAME_DIR" ]; then
+    echo -e "${YELLOW}Could not auto-detect game directory.${NC}"
+    read -rp "Please enter the full path to the game folder: " GAME_DIR < /dev/tty
+    GAME_DIR="${GAME_DIR%/}"  # Strip trailing slash
+else
+    echo -e " - Found: ${GREEN}$GAME_DIR${NC}"
+fi
 echo ""
 
 # 1. Verify Clean Install
@@ -31,10 +130,12 @@ fi
 # Check if Game Directory Exists
 if [ ! -d "$GAME_DIR" ]; then
     echo -e "${RED}Error: Game directory not found at:${NC}"
-    echo "$GAME_DIR"
-    echo "Please ensure the game is installed via Steam."
+    echo "  $GAME_DIR"
+    echo "Please ensure '$GAME_NAME' is installed via Steam, then re-run this script."
+    rm -rf "$TEMP_DIR"
     exit 1
 fi
+echo -e " - Game directory confirmed."
 
 # 2. Download and Install Latest Release
 echo ""
@@ -57,11 +158,6 @@ if [ -n "$DOWNLOAD_URL" ]; then
     
     echo "Extracting..."
     if [[ "$FILENAME" == *.zip ]]; then
-        if ! command -v unzip &> /dev/null; then
-            echo -e "${RED}Error: 'unzip' is required but not installed.${NC}"
-            rm -rf "$TEMP_DIR"
-            exit 1
-        fi
         unzip -q "$DEST_FILE" -d "$TEMP_DIR/Starshift"
     elif [[ "$FILENAME" == *.tar.gz ]] || [[ "$FILENAME" == *.tgz ]]; then
         tar -xzf "$DEST_FILE" -C "$TEMP_DIR/Starshift"
@@ -103,7 +199,7 @@ read -p "Install Linux port? (y/n): " install_port < /dev/tty
 
 if [[ "$install_port" == "y" || "$install_port" == "Y" ]]; then
     echo ""
-    echo -e "${GREEN}Downloading NW.js SDK v0.49.1...${NC}"
+    echo -e "${GREEN}Downloading NW.js SDK v${NWJS_VERSION}...${NC}"
     
     # Download tarball
     wget -q --show-progress "$NWJS_URL" -O "$TEMP_DIR/nwjs.tar.gz"
