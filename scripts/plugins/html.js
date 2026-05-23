@@ -1,10 +1,10 @@
-import { Plugin, PluginBuild } from "esbuild";
 import { process } from "htmlnano"
 import { readFile } from "fs/promises"
 
+/** @satisfies {import("esbuild").Plugin} */
 const htmlPlugin = {
     name: "htmlPlugin",
-    setup: function (build: PluginBuild) {
+    setup: function (build) {
         build.onLoad({ filter: /\.html$/ }, async ({ path }) => {
             const data = await process(
                 await readFile(path, "utf-8"),
@@ -17,6 +17,6 @@ const htmlPlugin = {
             }
         })
     }
-} satisfies Plugin
+}
 
 export default htmlPlugin;

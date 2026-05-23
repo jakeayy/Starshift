@@ -8,11 +8,13 @@
   },
   "type": "module",
   "scripts": {
-    "build": "bun scripts/build",
+    "build": "node scripts/build.js",
     "inject": "./scripts/inject.sh && echo Injected!"
   },
   "private": true,
   "devDependencies": {
+	"@types/pixi.js": "4.5.4",
+    "@types/node": "^25.9.1",
     "@types/nw.js": "^0.92.0",
     "cssnano": "^7.1.2",
     "esbuild": "^0.27.2",
@@ -23,8 +25,5 @@
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "dependencies": {
-    "@types/pixi.js": "4.5.4"
   }
 }

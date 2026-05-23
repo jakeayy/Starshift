@@ -2,8 +2,11 @@ import { build } from "esbuild";
 import { mkdir, rm, cp, readFile, writeFile } from "fs/promises";
 import { join } from "path"
 
-import importGlobPlugin from "esbuild-plugin-import-glob"
-import htmlPlugin from "./plugins/html"
+import importGlobPluginM from "esbuild-plugin-import-glob"
+const { default: importGlobPlugin } = importGlobPluginM
+
+import htmlPlugin from "./plugins/html.js"
+
 
 const PROJECT_ROOT = join(import.meta.dirname, "..")
 const SRC_ROOT = join(PROJECT_ROOT, "src")
