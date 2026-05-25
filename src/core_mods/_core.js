@@ -88,6 +88,7 @@ const patchFpsLimiter = (settings) => {
                 if (settings.fps <= 0)
                     return SceneManager.update();
                 
+				
                 if (!SceneManager._lastFrameTime) SceneManager._lastFrameTime = timestamp;
                 var elapsed = timestamp - SceneManager._lastFrameTime;
                 var interval = 1000 / settings.fps;
@@ -95,7 +96,8 @@ const patchFpsLimiter = (settings) => {
                     SceneManager._lastFrameTime = timestamp - (elapsed % interval);
                     SceneManager.update();
                 } else {
-                    SceneManager.requestUpdate();
+					setTimeout(() => SceneManager.update(), interval - elapsed)
+
                 }
             });
         }

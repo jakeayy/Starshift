@@ -1,11 +1,12 @@
 import { build } from "esbuild";
-import { mkdir, rm, cp, readFile, writeFile } from "fs/promises";
+import { mkdir, rm, cp } from "fs/promises";
 import { join } from "path"
 
 import importGlobPluginM from "esbuild-plugin-import-glob"
 const { default: importGlobPlugin } = importGlobPluginM
 
 import htmlPlugin from "./plugins/html.js"
+import supportImportPlugin from "./plugins/support-import.js"
 
 
 const PROJECT_ROOT = join(import.meta.dirname, "..")
@@ -31,7 +32,7 @@ await build({
     banner: { "js": "/** Use dev console to inspect the source code!  */" },
 
     external: ["node", "v8", "uv", "zlib", "brotli", "ares", "modules", "nghttp2", "napi", "llhttp", "openssl", "icu", "unicode", "nw", "node-webkit", "nw-commit-id", "nw-flavor", "chromium", "greenworks"],
-    plugins: [importGlobPlugin(), htmlPlugin],
+    plugins: [supportImportPlugin, importGlobPlugin(), htmlPlugin],
     loader: {
         ".html": "text"
     }
@@ -39,11 +40,6 @@ await build({
 
 
 await Promise.all([
-    writeFile(
-        join(DIST_MOD_DIR, "index.js"),
-        await readFile(join(DIST_MOD_DIR, "index.js"), "utf-8")
-            .then(text => text.replace(/throw new Error\("Module not found in bundle: "\+(.+?)\)/, "return import($1)"))
-    ),
     mkdir(join(DIST_MOD_DIR, "mods")),
     cp(INCL_DIR, DIST_DIR, { force: true, recursive: true })
 ])
