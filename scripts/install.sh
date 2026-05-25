@@ -4,7 +4,12 @@
 GAME_NAME="In Stars And Time"
 NWJS_VERSION="0.49.2"
 REPO_URL="https://codeberg.org/jakeayy/Starshift"
-NWJS_URL="https://dl.nwjs.io/v${NWJS_VERSION}/nwjs-v${NWJS_VERSION}-linux-x64.tar.gz"
+# Set DEV=1 to install the SDK build of NW.js (includes DevTools)
+if [[ "${DEV}" == "1" ]]; then
+    NWJS_URL="https://dl.nwjs.io/v${NWJS_VERSION}/nwjs-sdk-v${NWJS_VERSION}-linux-x64.tar.gz"
+else
+    NWJS_URL="https://dl.nwjs.io/v${NWJS_VERSION}/nwjs-v${NWJS_VERSION}-linux-x64.tar.gz"
+fi
 TEMP_DIR=$(mktemp -d)
 
 # --- Colors for Output ---
@@ -199,7 +204,11 @@ read -p "Install Linux port? (y/n): " install_port < /dev/tty
 
 if [[ "$install_port" == "y" || "$install_port" == "Y" ]]; then
     echo ""
-    echo -e "${GREEN}Downloading NW.js SDK v${NWJS_VERSION}...${NC}"
+    if [[ "${DEV}" == "1" ]]; then
+        echo -e "${GREEN}Downloading NW.js SDK v${NWJS_VERSION} (SDK build, includes DevTools)...${NC}"
+    else
+        echo -e "${GREEN}Downloading NW.js v${NWJS_VERSION}...${NC}"
+    fi
     
     # Download tarball
     wget -q --show-progress "$NWJS_URL" -O "$TEMP_DIR/nwjs.tar.gz"

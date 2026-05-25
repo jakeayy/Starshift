@@ -22,7 +22,7 @@ bash <(curl -sSL https://codeberg.org/jakeayy/Starshift/raw/branch/main/scripts/
 ### c) Building
 #### Prerequisites:
 - [git (most likely already included if you're on Linux)](https://git-scm.com)
-- [npm (included with NodeJS)](https://nodejs.org/) or preferably [bun runtime](https://bun.sh) (for this guide we'll use bun)
+- [npm (included with NodeJS)](https://nodejs.org/) or preferably `pnpm` (`npm i -g pnpm`)
 #### Tutorial:
 1. Clone the repo with:
     ```sh
@@ -31,13 +31,13 @@ bash <(curl -sSL https://codeberg.org/jakeayy/Starshift/raw/branch/main/scripts/
 2. Navigate to the newly downloaded directory
 3. Download dependencies with:
     ```sh
-    bun install
+    pnpm install --frozen-lockfile
     ```
 4. Build it!
     ```sh
-    bun run build
+    pnpm build
     ```
-5. The final files should be in `dist` directory! Just follow the same steps as from [Manual Guide](#b-manual) or you can use `bun inject` to automatically install it to your game
+5. The final files should be in `dist` directory! Just follow the same steps as from [Manual Guide](#b-manual) or you can use `pnpm inject` to automatically install it to your game
 > [!CAUTION]
 > Injecting currently works only on Linux and **OVERRIDES ALL YOUR MOD LOADER DATA**. Be sure to backup any mods you care about.
 
@@ -47,7 +47,8 @@ bash <(curl -sSL https://codeberg.org/jakeayy/Starshift/raw/branch/main/scripts/
 - `--no-mods` - Runs the game with no mods whatsoever. (also prevents from showing Mods list and it's settings - they're in CORE mod)
 ### Environment Variables
 - `DEBUG` - Running this will enable some useful features for modding, such as internal NWJS' dev tools
-
+### Installation Environment Variables
+- `DEV` - Installs SDK version of NW.js 0.49.2 that includes features like Dev Tools **(USE ONLY AS MOD CREATOR/PROJECT CONTRIBUTOR)**
 
 ## TODO
 - [ ] - REWRITE - internal variable typings
