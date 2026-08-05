@@ -53,11 +53,11 @@ async function debugLoad() {
     const win = nw.Window.get();
 
     win.showDevTools()
-    // capturing to prevent others from intercepting the key
-	document.body.addEventListener("keydown", ({ key }) =>
-        key === "F12" && win.showDevTools(),
-    { capture: true })
 }
+// capturing to prevent others from intercepting the key
+document.body.addEventListener("keydown", ({ key }) =>
+    key === "F12" && win.showDevTools(),
+{ capture: true })
 
 class LoadingScreen {
     private static element?: HTMLDivElement;
@@ -141,13 +141,16 @@ async function getMods(): Promise<ImportedMod[]> {
             .map(f => f.name)
             .sort((na, nb) => na.localeCompare(nb))
         )
-    
+
+    const dynamicImport: (path: string) => Promise<ModModule> = new Function("p", "return import(p)") as any;
     return [
         // builtin mods
         ...builtInModNames.map<ImportedMod>((n, i) => [n, builtinMods[i], true]),
         // loaded mods
         ...await Promise.all(
-            modNames.map<Promise<ModModule>>((n) => import("./" + join(window.StarshiftConst.RELATIVE_MODS_DIR, n)))
+          modNames.map<Promise<ModModule>>((n) =>
+            // i hate this hack with burning passion
+            dynamicImport(`./${window.StarshiftConst.RELATIVE_MODS_DIR}/${n}`))
         ).then(l => l.map<ImportedMod>((m, i) => [modNames[i]!, m, false]))
     ]
 }
@@ -215,7 +218,7 @@ async function load() {
     // mod registering
     const mods = await getMods()
     LoadingScreen.loadModNames(mods.map(([n]) => n))
-    
+
     for (const [id, mod, builtIn] of mods)
         await registerMod(id, mod, builtIn)
 

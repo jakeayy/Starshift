@@ -1,8 +1,8 @@
-import { join } from "path"
-import { readdirSync } from "fs"
+import { basename, dirname, join, relative } from "path"
+import { existsSync, readdirSync } from "fs"
 import { platform } from "os"
 
-import { ROOT } from "@/const"
+import { fileURLToPath, pathToFileURL } from "url"
 
 /** @satisfies {import("@/types").ModConfig} */
 export const config = {
@@ -14,29 +14,99 @@ export const config = {
 	forceDisable: () => platform() !== "linux"
 }
 
+/** @type {Map<string, Map<string, string>>} */
+const dirMapCache = new Map()
+
+function getTrueCasePath(targetPath) {
+  const cachedPath = dirMapCache.get(targetPath)
+  if (cachedPath) return cachedPath
+  if (existsSync(targetPath)) return targetPath;
+
+
+  const dir = dirname(targetPath);
+  const base = basename(targetPath);
+
+  // TODO: make function recursive in case of future directory case mismatches
+  if (!existsSync(dir)) return targetPath;
+
+  const files = readdirSync(dir);
+  const match = files.find(f => f.toLowerCase() === base.toLowerCase());
+
+  if (match) {
+    const result = join(dir, match)
+    dirMapCache.set(targetPath, result)
+    return result
+  }
+
+  return targetPath;
+}
+
 export const onLoad = () => {
-	/** @type {Map<string, Map<string, string>>} */
-	const dirMapCache = new Map()
-	
+
+
 	// file case fix
-	const loadBitmap = ImageManager.loadBitmap
-	ImageManager.loadBitmap = function(dir, fileName, ...args) {
-		let fileMap = dirMapCache.get(dir)
+	chrome.webRequest.onBeforeRequest.addListener(
+    function(details) {
+        const reqUrl = details.url;
 
-		if (!fileMap) {
-			fileMap = new Map();
+        if (!reqUrl.startsWith('chrome-extension://') && !reqUrl.startsWith('file://'))
+            return {};
 
-			try {
-				readdirSync(join(ROOT, dir)).forEach(f => {
-					const baseName = f.split('.').slice(0, -1).join('.');
-					fileMap.set(baseName.toLowerCase(), baseName)
-				})
-			} catch(e) { console.warn("Could not setup fileMap cache! ", e) }
+        try {
+            let localPath = '';
 
-			dirMapCache.set(dir, fileMap)
-		}
+            if (reqUrl.startsWith('file://'))
+                localPath = fileURLToPath(reqUrl);
+            else if (reqUrl.startsWith('chrome-extension://')) {
+                const urlObj = new URL(reqUrl);
+                const relativePath = urlObj.pathname.substring(1); // remove leading slash
+                localPath = join(process.cwd(), relativePath);
+            }
 
-		const correctedFileName = fileMap.get(fileName.toLowerCase()) ?? fileName;
-		return loadBitmap.apply(this, [dir, correctedFileName, ...args])
-	}
+            if (localPath) {
+                const actualPath = getTrueCasePath(localPath);
+
+                if (actualPath !== localPath) {
+                    let newUrl = '';
+
+                    if (reqUrl.startsWith('file://'))
+                        newUrl = pathToFileURL(actualPath).href;
+                    else {
+                        const urlObj = new URL(reqUrl);
+                        const relativeNewPath = relative(process.cwd(), actualPath);
+                        newUrl = `chrome-extension://${urlObj.host}/${relativeNewPath.replace(/\\/g, '/')}`;
+                    }
+
+                    return { redirectUrl: newUrl };
+                }
+            }
+        } catch (e) {
+            console.error('[Starshift] Error intercepting request:', e);
+        }
+
+        return {};
+    },
+    { urls: ["<all_urls>"] },
+    ["blocking"]
+	);
+	// const loadBitmap = ImageManager.loadBitmap
+	// ImageManager.loadBitmap = function(dir, fileName, ...args) {
+	// 	let fileMap = dirMapCache.get(dir)
+
+	// 	if (!fileMap) {
+	// 		fileMap = new Map();
+
+	// 		try {
+	// 			readdirSync(join(ROOT, dir)).forEach(f => {
+	// 				const baseName = f.split('.').slice(0, -1).join('.');
+	// 				fileMap.set(baseName.toLowerCase(), baseName)
+	// 			})
+	// 		} catch(e) { console.warn("Could not setup fileMap cache! ", e) }
+
+	// 		dirMapCache.set(dir, fileMap)
+	// 	}
+
+	// 	const correctedFileName = fileMap.get(fileName.toLowerCase()) ?? fileName;
+	// 	return loadBitmap.apply(this, [dir, correctedFileName, ...args])
+	// }
 }

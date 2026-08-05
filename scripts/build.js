@@ -6,7 +6,6 @@ import importGlobPluginM from "esbuild-plugin-import-glob"
 const { default: importGlobPlugin } = importGlobPluginM
 
 import htmlPlugin from "./plugins/html.js"
-import supportImportPlugin from "./plugins/support-import.js"
 
 
 const PROJECT_ROOT = join(import.meta.dirname, "..")
@@ -32,7 +31,7 @@ await build({
     banner: { "js": "/** Use dev console to inspect the source code!  */" },
 
     external: ["node", "v8", "uv", "zlib", "brotli", "ares", "modules", "nghttp2", "napi", "llhttp", "openssl", "icu", "unicode", "nw", "node-webkit", "nw-commit-id", "nw-flavor", "chromium", "greenworks"],
-    plugins: [supportImportPlugin, importGlobPlugin(), htmlPlugin],
+    plugins: [importGlobPlugin(), htmlPlugin],
     loader: {
         ".html": "text"
     }

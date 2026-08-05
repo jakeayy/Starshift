@@ -6,8 +6,13 @@ Starshift is a powerful Mod Loader for game ISAT (In Stars And Time) with minima
 
 
 ## Installing
-### a) Automatic (Linux Only)
-This project includes an installation script that looks for the game's directory and installs all needed files! (Including Steam Integration Fix)
+### a) Automatic
+This project includes an installation script that looks for the game's directory and installs all needed files! (Including Steam Integration Fix if on Linux)
+#### Windows
+```ps1
+irm https://codeberg.org/jakeayy/Starshift/raw/branch/main/scripts/install.ps1 | iex
+```
+#### Linux
 ```sh
 bash <(curl -sSL https://codeberg.org/jakeayy/Starshift/raw/branch/main/scripts/install.sh)
 ```
@@ -46,19 +51,17 @@ bash <(curl -sSL https://codeberg.org/jakeayy/Starshift/raw/branch/main/scripts/
 ### Arguments
 - `--no-mods` - Runs the game with no mods whatsoever. (also prevents from showing Mods list and it's settings - they're in CORE mod)
 ### Environment Variables
-- `DEBUG` - Running this will enable some useful features for modding, such as internal NWJS' dev tools
+> [!WARNING]
+> The `DEBUG` variable is deprecated! If you have dev variant installed you can enable dev tools with F12.
 ### Installation Environment Variables
-- `DEV` - Installs SDK version of NW.js 0.49.2 that includes features like Dev Tools **(USE ONLY AS MOD CREATOR/PROJECT CONTRIBUTOR)**
+- `DEV` - Installs SDK version of NW.js that includes features like Dev Tools **(USE ONLY AS MOD CREATOR/PROJECT CONTRIBUTOR)**
+  When on Windows it asks you by default but you can set it with `$Env:DEV = '1'`.
 
 ## TODO
 - [ ] - REWRITE - internal variable typings
-- [x] - REWRITE - loading screen
 - [ ] - REWRITE - logs
-- [x] - Ability to disable specific mods from menu
 - [ ] - Mods and loader in-fly building and caching
 - [ ] - Built-in helpers and API
-- [ ] - Universal Game Interpreter API for easier RPG Maker scripting support
-- [x] - Proper install script w/ Linux Support - **CURRENTLY LINUX ONLY**
 - [ ] - Possibly more game optimizations? (including memory leak fix)
 
 ...and more

@@ -1,8 +1,8 @@
 /**
  * Shows dialogue box on scene
- * 
+ *
  * TEMPORARY METHOD UNTIL GAMEINTERPRETERAPI IS MADE. DO NOT USE. IT'S HIGHLY UNSTABLE
- * @param {string} message 
+ * @param {string} message
  */
 const tempMessageAdd = async (message) => {
     if (!SceneManager._scene._spriteset) {
@@ -12,7 +12,7 @@ const tempMessageAdd = async (message) => {
     if (!SceneManager._scene._spriteset._messageBustSprites) {
         var spriteset = SceneManager._scene._spriteset;
         spriteset._messageBustSprites = [null];
-        
+
         for (var i = 1; i <= 10; i++)
             spriteset._messageBustSprites[i] = new Sprite_VisualNovelBust(i);
     }
@@ -40,6 +40,7 @@ export default class Window_ModMenu extends Window_Selectable {
     changedMods = new Set()
     /** @type {import("@/types").Mod[]} */
     _data = Array.from(window.Starshift.mods.values())
+        .filter(m => !(m.builtIn && m.forceDisable?.()))
 
     constructor(parentWindow) {
         super(0, 0, 500, 500)
@@ -57,10 +58,10 @@ export default class Window_ModMenu extends Window_Selectable {
                 version: "0.0",
                 store: { settings: { enabled: true } }
             })
-        
+
         this.refresh()
         this.select(0)
-        
+
         this.setHandler("cancel", async () => {
             this.close()
 
@@ -69,7 +70,7 @@ export default class Window_ModMenu extends Window_Selectable {
                 window.Starshift.saveSettings()
                 await tempMessageAdd("\\m[vtuto][Psst!\\| You need to restart the game if you want to\ndisable mods! Just saying~]")
             }
-            
+
             this.parentWindow.activate()
         })
 
@@ -84,7 +85,7 @@ export default class Window_ModMenu extends Window_Selectable {
             this.redrawCurrentItem();
             this.activate()
         })
-        
+
         this.activate()
         this.open()
     }
@@ -102,7 +103,7 @@ export default class Window_ModMenu extends Window_Selectable {
     titleHeight() { return this.titleTextHeight + (this.separatorPadding * 2) + this.separatorSize; }
     modNameHeight = 25;
     modMetaHeight = 15;
-    
+
     itemHeight() { return this.modNameHeight + this.modMetaHeight * 2 + this.padding; }
 
     itemRect(index) {
@@ -120,7 +121,7 @@ export default class Window_ModMenu extends Window_Selectable {
         // text
         const text = "\\i[135]Mods";
         this.drawTextEx(text, (this.width - this.textWidth(text)) / 2, 0)
-        
+
         // separator
         const lineY = this.titleTextHeight + this.separatorPadding;
         this.contents.fillRect(0, lineY, this.contentsWidth(), this.separatorSize, this.normalColor());
@@ -138,7 +139,7 @@ export default class Window_ModMenu extends Window_Selectable {
         // title
         this.contents.fontSize = this.modNameHeight;
         this.drawText(`${mod.name} v${mod.version}${mod.store.settings.enabled ? "" : " [X]"}`, rect.x, rect.y, rect.width, "center")
-        
+
         // meta
         this.contents.fontSize = this.modMetaHeight;
         const metaY = rect.y + this.modNameHeight;
@@ -147,7 +148,7 @@ export default class Window_ModMenu extends Window_Selectable {
             `by ${Array.isArray(mod.author) ? mod.author.join(", ") : mod.author}`,
             mod.description
         ]
-        
+
         for (let i = 0; i < metaStr.length; i++)
             this.drawText(metaStr[i], rect.x, metaY + (i * this.modMetaHeight), rect.width, "center")
     }
