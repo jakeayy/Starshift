@@ -52,12 +52,11 @@ async function debugLoad() {
     if (!window.Starshift.isDebug) return;
     const win = nw.Window.get();
 
-    win.showDevTools()
+    win.showDevTools();
+    // capturing to prevent others from intercepting the key
+    document.body.addEventListener("keydown", ({ key }) =>
+    key === "F12" && win.showDevTools(),{ capture: true })
 }
-// capturing to prevent others from intercepting the key
-document.body.addEventListener("keydown", ({ key }) =>
-    key === "F12" && win.showDevTools(),
-{ capture: true })
 
 class LoadingScreen {
     private static element?: HTMLDivElement;
