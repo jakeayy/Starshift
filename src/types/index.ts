@@ -45,20 +45,20 @@ export type ModConfig = {
     forceDisable?: () => boolean;
 }
 
-export type ModSettingsStore<S extends Record<string, any> = Record<string, any>, ST extends Record<keyof S, any> = Record<keyof S, any>> =
+export type ModSettingsStore<S extends Record<string, unknown> = Record<string, unknown>, ST extends Record<keyof S, unknown> = Record<keyof S, unknown>> =
     {
-        [K in keyof S as 
+        [K in keyof S as
             S[K] extends { type: "button" | "label" }
                 ? never
                 : K
-        ]: S[K] extends { "default": any }
+        ]: S[K] extends { "default": unknown }
             ? S[K]["default"]
             : ST[K]
     } & { enabled: boolean }
 
 type ModStore<C extends ModConfig> = {
     settings: ModSettingsStore<
-        C["settings"] extends Record<string, any> ? C["settings"] : Record<string, any>
+        C["settings"] extends Record<string, unknown> ? C["settings"] : Record<string, unknown>
     >
 }
 

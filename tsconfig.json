@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
 		// Environment setup & latest features
-		"lib": ["DOM"],
-		"types": ["node"],
+		"lib": ["DOM", "ES2019.Object"],
+		"types": ["node", "chrome", "nw.js", "pixi.js", "rmmv.d.ts/rmmv.d.ts"],
 		"target": "ESNext",
 		"module": "Preserve",
 		"moduleDetection": "force",

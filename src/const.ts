@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from "fs";
 import { join, relative } from "path";
 
-export const ROOT = join(nw.__dirname, "www");
+export const ROOT = join(process.cwd(), "www");
 export const MOD_ROOT = join(ROOT, "mod");
 export const LOGS_PATH = join(MOD_ROOT, "logs");
 export const MODS_DIR = join(MOD_ROOT, "mods");

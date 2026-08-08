@@ -13,9 +13,9 @@ declare global {
       /** Mod settings */
       settings: Map<string, ModSettingsStore>
       /** Loads mod settings, true if loaded successfully */
-      async loadSettings(): Promise<boolean>;
+      loadSettings(): Promise<boolean>;
       /** Saves mod settings, true if saved successfully */
-      async saveSettings(): Promise<boolean>;
+      saveSettings(): Promise<boolean>;
 
       /** Creates temporary directory for mods to use */
       tempDir(): string;

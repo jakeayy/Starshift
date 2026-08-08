@@ -9,19 +9,27 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",
-    "inject": "./scripts/inject.sh && echo Injected!"
+    "inject": "./scripts/inject.sh && echo Injected!",
+    "lint": "eslint ."
   },
   "private": true,
   "devDependencies": {
-	"@types/pixi.js": "4.5.4",
-    "@types/node": "^25.9.1",
-    "@types/nw.js": "^0.92.0",
-    "cssnano": "^7.1.2",
-    "esbuild": "^0.27.2",
+    "@eslint/js": "^10.0.1",
+    "@types/chrome": "0.0.114",
+    "@types/node": "15.0.1",
+    "@types/nw.js": "0.13.10",
+    "@types/pixi.js": "4.5.4",
+    "cssnano": "^8.0.4",
+    "esbuild": "^0.28.1",
     "esbuild-plugin-import-glob": "^0.1.1",
-    "htmlnano": "^3.0.0",
-    "postcss": "^8.5.6",
-    "svgo": "^4.0.0"
+    "eslint": "^10.8.0",
+    "globals": "^17.9.0",
+    "htmlnano": "^3.4.0",
+    "jiti": "^2.7.0",
+    "postcss": "^8.5.26",
+    "rmmv.d.ts": "github:AsterAtwood/rmmv.d.ts",
+    "svgo": "^4.0.2",
+    "typescript-eslint": "^8.66.0"
   },
   "peerDependencies": {
     "typescript": "^5"

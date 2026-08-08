@@ -7,10 +7,5 @@ declare global {
         /** Gets path to the game save directory */
         localFileDirectoryPath: () => string
     },
-    /** Manages RPG Maker's scenes */
-    SceneManager: {
-      /** Initializes and shows scene */
-      run(sceneClass: any): void
-    }
   }
 }

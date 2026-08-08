@@ -9,6 +9,14 @@
         <link rel="apple-touch-icon" href="icon/icon.png">
         <link rel="stylesheet" type="text/css" href="fonts/gamefont.css">
         <title>Starshift ALPHA</title>
+        <script type="module">
+          window.addEventListener('error', (e) => {
+            if ((e.error?.stack ?? '').includes("mod/index.js")) {
+              alert("FAIL SAFE. ERROR AT EARLY LOADING OF STARSHIFT. OPENING DEV TOOLS\n\n" + e.message)
+              nw.Window.get().showDevTools()
+            }
+          });
+        </script>
     </head>
     <body style="background-color: black">
         <script type="module" src="mod/index.js"></script>

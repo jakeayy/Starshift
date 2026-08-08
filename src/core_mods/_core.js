@@ -87,8 +87,7 @@ const patchFpsLimiter = (settings) => {
             requestAnimationFrame(timestamp => {
                 if (settings.fps <= 0)
                     return SceneManager.update();
-                
-				
+
                 if (!SceneManager._lastFrameTime) SceneManager._lastFrameTime = timestamp;
                 var elapsed = timestamp - SceneManager._lastFrameTime;
                 var interval = 1000 / settings.fps;
@@ -109,7 +108,7 @@ export function onRegister(mod) {
     if (mod.store.settings.optimizations)
         applyOptimizations(mod.store.settings.experimentalOptimizations)
     patchFpsLimiter(mod.store.settings)
-        
+
     console.log("if you see this, that means core mod is working! :3")
 }
 

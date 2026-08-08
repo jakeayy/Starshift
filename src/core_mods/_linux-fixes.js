@@ -89,24 +89,4 @@ export const onLoad = () => {
     { urls: ["<all_urls>"] },
     ["blocking"]
 	);
-	// const loadBitmap = ImageManager.loadBitmap
-	// ImageManager.loadBitmap = function(dir, fileName, ...args) {
-	// 	let fileMap = dirMapCache.get(dir)
-
-	// 	if (!fileMap) {
-	// 		fileMap = new Map();
-
-	// 		try {
-	// 			readdirSync(join(ROOT, dir)).forEach(f => {
-	// 				const baseName = f.split('.').slice(0, -1).join('.');
-	// 				fileMap.set(baseName.toLowerCase(), baseName)
-	// 			})
-	// 		} catch(e) { console.warn("Could not setup fileMap cache! ", e) }
-
-	// 		dirMapCache.set(dir, fileMap)
-	// 	}
-
-	// 	const correctedFileName = fileMap.get(fileName.toLowerCase()) ?? fileName;
-	// 	return loadBitmap.apply(this, [dir, correctedFileName, ...args])
-	// }
 }

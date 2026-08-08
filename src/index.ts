@@ -4,6 +4,9 @@ import { basename, join } from "path";
 import { existsSync, mkdirSync } from "fs";
 import loaderHtml from "./loader.html"
 
+import * as API from "./api"
+import * as Const from "./const"
+
 window.Starshift = class {
     static get isDebug() { return typeof process.env["DEBUG"] === "string"; }
     static get isDisabled() { return nw.App.argv.includes("--no-mods") }
@@ -43,10 +46,10 @@ window.Starshift = class {
         return path
     }
 
-    static API = require("./api")
+    static API = API
 };
 
-window.StarshiftConst = require("./const.ts");
+window.StarshiftConst = Const;
 
 async function debugLoad() {
     if (!window.Starshift.isDebug) return;
@@ -129,7 +132,8 @@ class LoadingScreen {
 type ImportedMod = [string, ModModule, boolean]
 async function getMods(): Promise<ImportedMod[]> {
     // @ts-expect-error Glob importing
-    const { default: builtinMods, filenames: builtInModNames } = await import("./core_mods/*.js") as { default: any[], filenames: string[] }
+    const { default: builtinMods, filenames: builtInModNames } = await import("./core_mods/*.js") as { default: ModModule[], filenames: string[] }
+    console.log(builtinMods)
     const modNames = await readdir(window.StarshiftConst.MODS_DIR, { withFileTypes: true })
         .then(l =>
             l.filter(f =>
@@ -141,15 +145,14 @@ async function getMods(): Promise<ImportedMod[]> {
             .sort((na, nb) => na.localeCompare(nb))
         )
 
-    const dynamicImport: (path: string) => Promise<ModModule> = new Function("p", "return import(p)") as any;
     return [
         // builtin mods
-        ...builtInModNames.map<ImportedMod>((n, i) => [n, builtinMods[i], true]),
+        ...builtInModNames.map<ImportedMod>((n, i) => [n, builtinMods[i]!, true]),
         // loaded mods
         ...await Promise.all(
           modNames.map<Promise<ModModule>>((n) =>
             // i hate this hack with burning passion
-            dynamicImport(`./${window.StarshiftConst.RELATIVE_MODS_DIR}/${n}`))
+            new Function("p", "return import(p)")(`./${window.StarshiftConst.RELATIVE_MODS_DIR}/${n}`))
         ).then(l => l.map<ImportedMod>((m, i) => [modNames[i]!, m, false]))
     ]
 }
@@ -208,9 +211,7 @@ async function load() {
     LoadingScreen.setRandomProtip()
 
     // clean temporary files
-    // @ts-ignore version difference
-    await rmdir(window.StarshiftConst.TEMP_DIR, { recursive: true })
-
+  await rmdir(window.StarshiftConst.TEMP_DIR, { recursive: true })
     // load mod settings
     await window.Starshift.loadSettings()
 
@@ -228,8 +229,9 @@ async function load() {
                 .map(mod => mod.onLoad?.(mod))
         )
 
-        LoadingScreen.destroy()
-        window.SceneManager.run(Scene_Boot);
+      LoadingScreen.destroy()
+      // @ts-expect-error Proper way of loading a scene
+      window.SceneManager.run(Scene_Boot);
     }
 
 	if (document.readyState === "complete") loadGame();
