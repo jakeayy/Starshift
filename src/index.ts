@@ -1,15 +1,16 @@
-import { readdir, readFile, rmdir, writeFile } from "fs/promises"
-import type { Mod, ModConfig, ModModule, ModSettingsStore } from "@/types";
-import { basename, join } from "path";
+import { readFile, rmdir, writeFile } from "fs/promises"
+import type { RegisteredMod, ModConfig, ModModule, ModSettingsStore } from "@/types";
+import { join } from "path";
 import { existsSync, mkdirSync } from "fs";
-import loaderHtml from "./loader.html"
+import glob from "fast-glob";
+import PackedModManager from "./PackedMods";
+import LoaderScreen from "./loader"
 
 import * as API from "./api"
 import * as Const from "./const"
 
 window.Starshift = class {
     static get isDebug() { return typeof process.env["DEBUG"] === "string"; }
-    static get isDisabled() { return nw.App.argv.includes("--no-mods") }
 
     static mods = new Map();
     static settings = new Map();
@@ -51,112 +52,59 @@ window.Starshift = class {
 
 window.StarshiftConst = Const;
 
-async function debugLoad() {
-    if (!window.Starshift.isDebug) return;
-    const win = nw.Window.get();
 
-    win.showDevTools();
-    // capturing to prevent others from intercepting the key
-    document.body.addEventListener("keydown", ({ key }) =>
-    key === "F12" && win.showDevTools(),{ capture: true })
+type ImportedMod = {
+  id: string,
+  module: ModModule,
+  isBuiltIn: boolean
 }
 
-class LoadingScreen {
-    private static element?: HTMLDivElement;
-    private static modsListEl?: HTMLDivElement;
-    private static modsElsMap: Map<string, HTMLSpanElement> = new Map()
-    private static protipEl?: HTMLSpanElement;
-    private static readonly PROTIPS: string[] = [
-        "in fact, alpha was not alpha, i accidentally removed half of alpha and had to rewrite it lol (-7 hours)",
-        "originally there was no linux support! but i added it because i play on linux... (isat linux wen)",
-        "this is my first ever mod loader project! i think i did good",
-        "first EVER mod for starshift was Starshuffler! a randomizer for isat! (by me)",
-        "you'll likely never read this message because the loader is so fast i had to artificially slow it down!",
-        "you'll never read this protip because i made it not show up in game :b"
-    ]
-
-    static loadModNames(names: string[]) {
-        if (!this.modsListEl) throw new Error("Loading screen is not ready yet! use .setup() first")
-
-        this.modsElsMap = new Map(
-            names.map(n => {
-                const el = document.createElement("span")
-                el.innerText = n;
-                return [n, el]
-            })
-        )
-
-        this.modsListEl.innerHTML = ""
-        this.modsListEl.append(...this.modsElsMap.values())
-    }
-
-    static finishLoadingMod(name: string) {
-        const el = this.modsElsMap.get(name)
-        if (!el) return;
-
-        el.classList.add("finished")
-        this.modsElsMap.delete(name)
-    }
-
-    static setProtip(text: string) {
-        if (!this.protipEl) throw new Error("Loading screen is not ready yet! use .setup() first")
-        this.protipEl.innerText = text
-    }
-
-    static setRandomProtip() {
-        const protip = this.PROTIPS[Math.floor(Math.random() * (this.PROTIPS.length-1))]!
-        this.setProtip(protip)
-    }
-
-    static setup() {
-        if (this.element) return;
-        this.element = document.createElement("div")
-        this.element.innerHTML = loaderHtml;
-        document.body.prepend(this.element)
-
-        this.modsListEl = this.element.querySelector("#to-load")!
-        this.protipEl = this.element.querySelector("#protip")!
-    }
-
-    static destroy() {
-        if (!this.element) return;
-        this.modsElsMap.clear()
-        this.element.remove()
-
-        this.protipEl = undefined;
-        this.modsListEl = undefined;
-        this.element = undefined;
-    }
-}
-
-type ImportedMod = [string, ModModule, boolean]
+/**
+ * Gets list of all mods
+ */
 async function getMods(): Promise<ImportedMod[]> {
     // @ts-expect-error Glob importing
     const { default: builtinMods, filenames: builtInModNames } = await import("./core_mods/*.js") as { default: ModModule[], filenames: string[] }
-    console.log(builtinMods)
-    const modNames = await readdir(window.StarshiftConst.MODS_DIR, { withFileTypes: true })
-        .then(l =>
-            l.filter(f =>
-                f.isFile()
-                && f.name.endsWith(".js")
-                && !builtInModNames.includes(basename(f.name, ".js"))
-            )
-            .map(f => f.name)
-            .sort((na, nb) => na.localeCompare(nb))
-        )
+
+    // unpack packed mods first
+    await PackedModManager.prepareFromModsDir()
+
+    // THEN load all of them
+  const modNames = await glob("*.{js,cjs,mjs}", {
+    cwd: window.StarshiftConst.MODS_DIR,
+    ignore: [
+      `${builtInModNames.map(n => n.replace(/,/, "\\,")).join(",")}.{js,mjs,cjs}`
+    ]
+  }).then(l => l.sort((na, nb) => na.localeCompare(nb)))
 
     return [
         // builtin mods
-        ...builtInModNames.map<ImportedMod>((n, i) => [n, builtinMods[i]!, true]),
+        ...builtInModNames.map<ImportedMod>((id, i) => ({
+          id,
+          module: builtinMods[i]!,
+          isBuiltIn: true
+        })),
+
         // loaded mods
-        ...await Promise.all(
+        ...(await Promise.all(
           modNames.map<Promise<ModModule>>((n) =>
             // i hate this hack with burning passion
-            new Function("p", "return import(p)")(`./${window.StarshiftConst.RELATIVE_MODS_DIR}/${n}`))
-        ).then(l => l.map<ImportedMod>((m, i) => [modNames[i]!, m, false]))
+            new Function("p", "return import(p)")(`./${window.StarshiftConst.RELATIVE_MODS_DIR}/${n}`)
+          )
+        )).map<ImportedMod>((module, i) => ({
+          id: modNames[i]!,
+          module,
+          isBuiltIn: false
+        }))
     ]
 }
 
+/**
+ * Prepares a store for mod to be used for storing data
+ * @param id mod id
+ * @param settingsMeta settings of a mod
+ * @returns Mod settings store, a reference
+ */
 async function prepareSettingsStore(id: string, settingsMeta: ModConfig["settings"]): Promise<ModSettingsStore> {
     const store: ModSettingsStore = window.Starshift.settings.get(id) ?? (() => {
         const store = { enabled: true }
@@ -181,68 +129,90 @@ async function prepareSettingsStore(id: string, settingsMeta: ModConfig["setting
     return store
 }
 
-async function registerMod(id: string, { config, onLoad, onRegister }: ModModule, builtIn: boolean) {
-    const settings = await prepareSettingsStore(id, config.settings);
-    const isEnabled: boolean = config.forceDisable
-        ? !config.forceDisable()
+/**
+ * Registers a mod and loads it to the game triggering register event
+ * @param mod imported mod to register
+ */
+async function registerMod({ id, module, isBuiltIn }: ImportedMod) {
+    const settings = await prepareSettingsStore(id, module.config.settings);
+    const isEnabled: boolean = module.config.forceDisable
+        ? !module.config.forceDisable()
         : (settings["enabled"] ?? true);
 
     // ensuring enabled always exists
     settings.enabled = isEnabled;
 
-    const mod: Mod = {
+    const mod: RegisteredMod = {
         id,
-        builtIn,
+        builtIn: isBuiltIn,
         store: { settings },
-        onLoad,
-        onRegister,
-        ...config,
+        onLoad: module.onLoad,
+        onRegister: module.onRegister,
+        ...module.config,
     }
 
     window.Starshift.mods.set(id, mod);
-    LoadingScreen.finishLoadingMod(id)
-    if (isEnabled) await onRegister?.(mod);
+    LoaderScreen.finishLoadingMod(id)
+
+    if (isEnabled)
+      await mod.onRegister?.(mod);
+}
+
+async function debugLoad() {
+    if (!window.Starshift.isDebug) return;
+
+    setTimeout(() => {
+      const win = nw.Window.get();
+
+      // capturing to prevent others from intercepting the key
+      document.body.addEventListener("keydown", ({ key }) =>
+        key === "F12" && win.showDevTools(), { capture: true })
+
+      win.showDevTools()
+    }, 2000) // small delay to let the document load
 }
 
 async function load() {
-    window.onload = null; // delaying game load
+  window.onload = null; // delaying game load
+  LoaderScreen.setup()
 
-    LoadingScreen.setup()
-    LoadingScreen.setRandomProtip()
+  // clean temporary files and import mods
+  const [ mods ] = await Promise.all([
+    getMods(), // import mods
+    rmdir(window.StarshiftConst.TEMP_DIR, { recursive: true }), // remove temporary files
+    window.Starshift.loadSettings() // load settings
+  ])
 
-    // clean temporary files
-  await rmdir(window.StarshiftConst.TEMP_DIR, { recursive: true })
-    // load mod settings
-    await window.Starshift.loadSettings()
+  LoaderScreen.loadModNames(mods.map(({ id }) => id))
 
-    // mod registering
-    const mods = await getMods()
-    LoadingScreen.loadModNames(mods.map(([n]) => n))
-
-    for (const [id, mod, builtIn] of mods)
-        await registerMod(id, mod, builtIn)
+  // mod registering
+  for (const mod of mods)
+    await registerMod(mod)
 
     const loadGame = async () => {
         await Promise.all(
-            [...window.Starshift.mods.values()]
+          Array.from(window.Starshift.mods.values())
                 .filter(m => m.store.settings.enabled)
                 .map(mod => mod.onLoad?.(mod))
         )
 
-      LoadingScreen.destroy()
+      PackedModManager.prepareDragDrop()
+      LoaderScreen.destroy()
       // @ts-expect-error Proper way of loading a scene
       window.SceneManager.run(Scene_Boot);
     }
 
 	if (document.readyState === "complete") loadGame();
-	else window.onload = () => loadGame()
+	else window.addEventListener("load", loadGame, { once: true })
 }
 
-if (!window.Starshift.isDisabled)
-    Promise.all([
-        debugLoad(),
-        load()
-    ]).catch(e => {
-        console.error("ERROR LOADING STARSHIFT! ", e)
-        alert("There was an error loading Starshift! Check debug console!")
-    })
+
+if (!nw.App.argv.includes("--no-mods"))
+  Promise.all([
+      debugLoad(),
+      load()
+  ]).catch(e => {
+      const msg: string = "message" in e ? e.message : String(e)
+      alert(`ERROR LOADING STARSHIFT!\nCheck console for more info.\n\n${msg}`)
+      console.error("Could not load Starshift:\n", e)
+  })

@@ -1,7 +1,6 @@
 import applyOptimizations from "./_core/optimizations"
 import prepareSettingsMenu from "./_core/settings"
 import Window_ModMenu from "./_core/windows"
-import { spawn } from "child_process"
 
 /** @satisfies {import("@/types").ModConfig} */
 export const config = {
@@ -48,6 +47,8 @@ export const config = {
             helpMessage: "Force disables loading any mods for next run!",
             type: "button",
             onOk: () => {
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                const { spawn } = require("child_process")
                 SoundManager.playLoad()
                 SceneManager._scene.fadeOutAll()
 
@@ -79,7 +80,7 @@ const addModsBtn = () => {
     }
 }
 
-/** @param {import("@/types").Mod<typeof config>["store"]["settings"]} settings  */
+/** @param {import("@/types").RegisteredMod<typeof config>["store"]["settings"]} settings  */
 const patchFpsLimiter = (settings) => {
     // fps limiter
     SceneManager.requestUpdate = function() {
@@ -103,7 +104,7 @@ const patchFpsLimiter = (settings) => {
     }
 }
 
-/** @param {import("@/types").Mod<typeof config>} mod  */
+/** @param {import("@/types").RegisteredMod<typeof config>} mod  */
 export function onRegister(mod) {
     if (mod.store.settings.optimizations)
         applyOptimizations(mod.store.settings.experimentalOptimizations)
@@ -113,6 +114,17 @@ export function onRegister(mod) {
 }
 
 export function onLoad() {
-    addModsBtn()
-    prepareSettingsMenu()
+  addModsBtn()
+  prepareSettingsMenu()
+
+  // fix random crash at the beginning of game load
+  const updateAnimatedPictureFrame = Sprite_Picture.prototype.updateAnimatedPictureFrame
+  Sprite_Picture.prototype.updateAnimatedPictureFrame = function () {
+    // for some reason this might be null if you're fast enough
+    console.warn("EARLY CRASH PREVENTION")
+    this.bitmap ??= new Bitmap()
+
+    Sprite_Picture.prototype.updateAnimatedPictureFrame = updateAnimatedPictureFrame
+    return updateAnimatedPictureFrame.call(this, ...arguments)
+  }
 }

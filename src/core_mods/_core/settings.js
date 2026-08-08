@@ -1,15 +1,15 @@
 const GENERIC_NONE = JSON.stringify("")
 
 /**
- * @param {string} modId 
- * @param {string} settingId 
- * @param {import("@/types").ModSetting} setting 
+ * @param {string} modId
+ * @param {string} settingId
+ * @param {import("@/types").ModSetting} setting
  */
 const createPickOption = (modId, settingId, setting) => {
     const updateValue = (add) => JSON.stringify(`
         const internalId = this.commandSymbol(this.index());
         const newValue = (this.getConfigValue(internalId) ${add ? "+" : "-"} 1).clamp(0, ${setting.choices.length - 1});
-        
+
         window.Starshift.settings.get("${modId}")["${settingId}"] = newValue
         this.changeValue(internalId, newValue)
     `)
@@ -56,9 +56,9 @@ const createLabelOption = () => {
 }
 
 /**
- * @param {string} modId 
- * @param {string} settingId 
- * @param {import("@/types").ModSetting} setting 
+ * @param {string} modId
+ * @param {string} settingId
+ * @param {import("@/types").ModSetting} setting
  */
 const createScaleOption = (modId, settingId, setting) => {
     const changeValCode = (add) => JSON.stringify(`
@@ -91,7 +91,7 @@ const createScaleOption = (modId, settingId, setting) => {
 }
 
 /**
- * @param {import("@/types").ModSetting} setting 
+ * @param {import("@/types").ModSetting} setting
  */
 const createButtonOption = (setting) => {
     const draw = JSON.stringify(`
@@ -110,8 +110,8 @@ const createButtonOption = (setting) => {
 
 /**
  * Creates option based on the setting
- * @param {string} modId 
- * @param {string} settingId 
+ * @param {string} modId
+ * @param {string} settingId
  * @param {import("@/types").ModSetting} setting
  */
 const createOption = (modId, settingId, setting) => {
@@ -129,7 +129,7 @@ const createOption = (modId, settingId, setting) => {
         case "label": codeData = createLabelOption(); break;
     }
 
-    
+
 
     return {
         Name: setting.title,
@@ -154,7 +154,7 @@ const createOption = (modId, settingId, setting) => {
 export default function prepareSettingsMenu() {
     // preparing settings
     const settings = [...window.Starshift.mods.entries()]
-        .filter(([, mod]) => mod.settings)
+        .filter(([, mod]) => mod.store.settings.enabled && mod.settings)
         .flatMap(([ modId, mod ]) => {
             const titleOption = createOption(modId, "", {
                 title: mod.name,
@@ -168,7 +168,7 @@ export default function prepareSettingsMenu() {
                     .map(([settingId, setting]) => createOption(modId, settingId, setting))
             ]
         });
-    
+
     // pushing mods category
     Yanfly.Param.OptionsCategories.push({
         Name: "\\i[135]Mods",

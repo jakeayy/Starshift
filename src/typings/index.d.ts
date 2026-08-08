@@ -1,4 +1,4 @@
-import type { Mod, ModSettingsStore } from "@/types"
+import type { RegisteredMod, ModSettingsStore } from "@/types"
 
 declare global {
   interface Window {
@@ -6,15 +6,13 @@ declare global {
     Starshift: {
       /** Is game running in debug mode? */
       get isDebug(): boolean;
-      /** Did user run the game with `--no-mods` preventing from loading mods? */
-      get isDisabled(): boolean;
 
-      mods: Map<string, Mod>;
-      /** Mod settings */
+      mods: Map<string, RegisteredMod>;
+      /** Starshift settings */
       settings: Map<string, ModSettingsStore>
-      /** Loads mod settings, true if loaded successfully */
+      /** Loads Starshift settings, true if loaded successfully */
       loadSettings(): Promise<boolean>;
-      /** Saves mod settings, true if saved successfully */
+      /** Saves Starshift settings, true if saved successfully */
       saveSettings(): Promise<boolean>;
 
       /** Creates temporary directory for mods to use */

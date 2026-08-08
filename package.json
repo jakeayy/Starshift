@@ -33,5 +33,10 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.3",
+    "fflate": "^0.8.3",
+    "setimmediate": "^1.0.5"
   }
 }

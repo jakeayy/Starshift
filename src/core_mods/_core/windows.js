@@ -38,7 +38,7 @@ const tempMessageAdd = async (message) => {
 export default class Window_ModMenu extends Window_Selectable {
     parentWindow;
     changedMods = new Set()
-    /** @type {import("@/types").Mod[]} */
+    /** @type {import("@/types").RegisteredMod[]} */
     _data = Array.from(window.Starshift.mods.values())
         .filter(m => !(m.builtIn && m.forceDisable?.()))
 

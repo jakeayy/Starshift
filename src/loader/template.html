@@ -1,0 +1,90 @@
+<style>
+    @font-face {
+        font-family: GameFont;
+        src: url("fonts/BestTen-CRT.ttf");
+        font-display: block;
+    }
+
+    @font-face {
+        font-family: TitleFont;
+        src: url("fonts/VCR_OSD_MONO_1.001.ttf");
+        font-display: block;
+    }
+
+    @keyframes blinking {
+        0%, 100% { filter: brightness(0%); }
+        50% { filter: brightness(100%); }
+    }
+
+    @keyframes finished {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    .loader {
+        left: 0;
+        width: calc(90vw - 50px);
+        top: 0;
+        height: calc(90vh - 50px);
+        position: fixed;
+        padding: 50px;
+        color: white;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 64px;
+        user-select: none;
+    }
+
+    h1 {
+        font-family: TitleFont;
+        font-size: 4em;
+        font-weight: 300;
+        padding: 0; margin: 0;
+    }
+
+    span {
+        font-family: GameFont;
+        font-size: 1.2em;
+    }
+
+    .icon {
+        image-rendering: pixelated;
+        background-image: url("img/menus/main/commands/Craft.png");
+        position: fixed;
+        bottom: 50px;
+        right: 50px;
+        animation: blinking 500ms linear infinite;
+        z-index: -99;
+    }
+
+    .protip-container {
+        color: rgb(88, 88, 88);
+    }
+
+    #to-load {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0 2em;
+    }
+
+    .finished {
+        color: lime;
+        animation: finished linear 1s forwards;
+    }
+</style>
+
+<div class="loader" oncontextmenu="return false" onkeydown="return false" onkeypress="return false">
+    <span class="protip-container">TIP:<br><span></span></span>
+    <h1>Loading Starshift...</h1>
+    <div id="to-load"></div>
+</div>
+
+<img
+    class="icon"
+    src="img/menus/main/commands/Craft.png"
+/>

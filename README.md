@@ -58,9 +58,8 @@ bash <(curl -sSL https://codeberg.org/jakeayy/Starshift/raw/branch/main/scripts/
   When on Windows it asks you by default but you can set it with `$Env:DEV = '1'`.
 
 ## TODO
-- [ ] - REWRITE - internal variable typings
 - [ ] - REWRITE - logs
-- [ ] - Mods and loader in-fly building and caching
+- [ ] - Update Check
 - [ ] - Built-in helpers and API
 - [ ] - Possibly more game optimizations? (including memory leak fix)
 

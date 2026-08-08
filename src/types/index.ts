@@ -62,7 +62,7 @@ type ModStore<C extends ModConfig> = {
     >
 }
 
-export type Mod<C extends ModConfig = ModConfig> = C & {
+export type RegisteredMod<C extends ModConfig = ModConfig> = C & {
     id: string;
     /** Is a core mod? (cannot be disabled in normal way) */
     builtIn: boolean,
@@ -74,7 +74,7 @@ export type Mod<C extends ModConfig = ModConfig> = C & {
     store: ModStore<C>
 }
 
-export type ModEvent = (mod: Mod<ModConfig>) => MaybePromise<void>
+export type ModEvent = (mod: RegisteredMod<ModConfig>) => MaybePromise<void>
 export type ModModule = {
     config: ModConfig,
     onLoad?: ModEvent,
