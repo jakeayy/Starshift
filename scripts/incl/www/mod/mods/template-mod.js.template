@@ -1,0 +1,75 @@
+// TIP:
+// generally recommended by me way of making a mod
+// is to clone the Starshift repo and develop it inside a
+// src/core_mods directory for all types, but doing it
+// from inside mods directory is also fine, you just won't
+// benefit from typescript declarations I made below
+
+/** @satisfies {import("@/types").ModConfig} */
+export const config = {
+	name: "Template Mod",
+	author: "???",
+	description: "Put your description here!",
+	version: "1.0",
+
+    // OPTIONAL function checking if mod shouldn't be able
+    // to be enabled by user, runs at the similar timing as
+    // onRegister. used internaly for example in Linux Fixes
+    // to check if user is using Linux system
+	forceDisable: () => {
+        return false
+    }
+
+    // OPTIONAL directory with settings implementation
+    // keys are their Ids used for finding setting values in
+    // stores using `#RegisteredMod.store.settings`
+    //
+    // all settings have required title and optional helpMessage
+    settings: {
+        labelType: {
+            type: "label",
+            title: "Label Setting",
+            helpMessage: "This acts as a simple label, it doesn't have options or value"
+        },
+        pickType: {
+            type: "pick",
+            title: "Pick Setting",
+            helpMessage: "This acts as pick setting, you can pick between N choices"
+            choices: ["yes", "no"],
+            // OPTIONAL value is kept as index of a choice (starting from 0, not 1)
+            default: 0
+        },
+        scaleType: {
+            type: "scale",
+            title: "Scale Setting",
+            helpMessage: "This acts as scale setting, you can select a specific number from it",
+            // OPTIONAL suffix, e.g. 60 **fps**
+            suffix: "suffix",
+            min: 0,
+            // (must be bigger than min)
+            max: 100,
+            // OPTIONAL by how many should the value change, default is 1
+            step: 1,
+            // OPTIONAL
+            default: 0
+        }
+    }
+}
+
+// runs the moment full game loads so running anything here
+// will be safe
+export const onLoad = () => {
+    console.log("example mod loaded! :)")
+}
+
+// runs the moment this specific mod registers. depending on
+// it's order it might load right before game loads but might
+// as well load during mod loading process so consider putting
+// here something that doesn't call internal timing functions
+// or RPGMV dependent functions like `Graphics` (patching should
+// be fine), returns fully registered mod instance with it's
+// states and store (that includes user settings)
+/** @param {import("@/types").RegisteredMod<typeof config>} mod  */
+export const onRegister = (mod) => {
+    console.log("example mod registered! :)")
+}
