@@ -1,4 +1,9 @@
 ![](/assets/icon.webp)
+
+[![](https://img.shields.io/badge/GameBanana-get-FFF?logo=gamebanana&logoColor=FFF)](https://gamebanana.com/mods/700828)
+[![](https://img.shields.io/badge/Home_Page-visit-FFF)](https://starshift.jakeayy.ch)
+[![](https://img.shields.io/gitea/v/release/jakeayy/Starshift?gitea_url=https%3A%2F%2Fcodeberg.org&include_prereleases&logo=codeberg&logoColor=FFF&color=FFF)](https://codeberg.org/jakeayy/Starshift/releases)
+
 # Starshift
 Starshift is a powerful Mod Loader for game ISAT (In Stars And Time) with minimal footprint and as much performance as possible!
 > [!CAUTION]
